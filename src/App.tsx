@@ -1,26 +1,42 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {Component, lazy, Suspense} from 'react';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+const About = lazy(() => import(/*webpackChunkName:"about"*/'./About'));
+
+// errorBoundary 可以捕获 import 加载错误
+// 利用了componentDidCatch 生命周期方法
+export interface IAppProps {
 }
 
-export default App;
+export default class App extends React.Component<IAppProps> {
+
+  state = {
+    isError: false,
+    errorTimes: 0
+  }
+  
+  static getDerivedStateFromError(props: any) {
+    return {
+      isError: true
+    }
+  }
+
+
+  render() {
+    if (this.state.isError) {
+      console.log('error render')
+      return (<div>is Error; {this.state.errorTimes}</div>)
+    } else {
+      console.log('about')
+      return (
+        <div>
+          <Suspense fallback={<div>loading</div>}>
+            <About/>
+          </Suspense>
+        </div>
+      );
+    }
+    
+  }
+}
+
